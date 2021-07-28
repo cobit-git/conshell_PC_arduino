@@ -78,6 +78,9 @@ void loop() {
     } 
     inCommand = inString[0];
     onoff = inString[1];
+    // Raspberry send "a1" or "a0"
+    // a0 -> turn off LED
+    // a1 -> turn on LED 
     if(inCommand == 'a'){
       if(onoff == '1'){
         digitalWrite(led, HIGH);
