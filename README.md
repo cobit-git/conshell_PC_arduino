@@ -19,16 +19,22 @@
 #include <DHT.h>
 #include <DHT_U.h>
 ```
+라이브러리 참고 URL은 다음을 참고해 주십시오.
+[DHT22 아두이노 라이브러리](https://github.com/adafruit/DHT-sensor-library)
 
 DHT22 센서를 사용하기 위해서는 다음 라이브러리를 추가로 설치해야 합니다. 이 라이브러리를 설치하고 다음 헤더파일을 포함합니다. 
 ```C
 #include <Adafruit_Sensor.h>
 ```
+라이브러리 참고 URL은 다음을 참고해 주십시오.
+[Adafruit Unified Sendor 라이브러리](https://github.com/adafruit/Adafruit_Sensor)
 
 로드셀 센서 HX711 센서용 라이브러리는 "HX711 Arduino Library" 입니다. 이 라이브러리를 설치하고 다음 헤더파일을 포함합니다. 
 ```C
 #include "HX711.h"
 ```
+라이브러리 참고 URL은 다음을 참고해 주십시오.
+[HX711 아두이노 라이브러리](https://github.com/bogde/HX711)
 
 ## 아두이노 라즈베리파이 프로토콜 
 ### 아두이노 -> 라즈베리파이 센서 데이터 프로토콜 
