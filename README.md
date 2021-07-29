@@ -230,3 +230,97 @@ else:
  unpack_data = struct.unpack(fmt, data)
  print(unpack_data)
  ```
+#### system_set() 함수 
+이 함수는 콘쉘 프로토콜 0x13 시스템 셋팅을 구현함 함수 입니다. 미리 UI를 통해서 시스템 셋팅할 값을 정합니다.    
+그 다음에 다음과 같은 코드로 시스템 셋팅 요청을 스마트 케이지 서버에 보냅니다. 
+```python
+STX = 0x0203
+CMD = 0x13
+dummy = 0xff
+mode = 0x00
+result = 0x00
+CRC = 0xffff
+len = 0x00
+
+value = (STX, CMD, dummy, mode, result, CRC, len, self.ProjectID, self.ProjectName, self.CageID, self.autoInterval,  self.distCalcRate, 
+        self.startLab_y, self.startLab_mo, self.startLab_d, self.startLab_h, self.startLab_mi, self.startLab_s, \
+        self.stopLab_y, self.stopLab_mo, self.stopLab_d, self.stopLab_h, self.stopLab_mi, self.stopLab_s)
+
+fmt = '>H B B B B H B H 40p H B f H B B B B B H B B B B B'.format()
+packer = struct.Struct(fmt)
+cmd = packer.pack(*value)
+self.client_socket.send(cmd)
+```
+
+이 요청을 받은 스마트 케이지 서버는 보내진 시스템 정보를 셋팅하고 회신 패킷을 보냅니다. 이 패킷은 다음과 같이 받습니다. 
+```python
+# receive data 
+data = self.client_socket.recv(1024)
+```
+ 회신된 데이터를 파싱합니다. 
+```python
+# parsing data 
+fmt = '>H B B B B H B'.format()
+unpack_data = struct.unpack(fmt, data)
+print(unpack_data)
+```
+
+#### ask_system() 함수 
+이 함수는 콘쉘 프로토콜 0x14 시스템 정보 요청을 구현한 함수 입니다. 다음과 같이 요청 패킷을 보냅니다. 
+```python
+STX = 0x0203
+CMD = 0x14
+dummy = 0xff
+mode = 0x00
+result = 0x00
+CRC = 0xffff
+len = 0x00
+# pack packet and send packet
+value = (STX, CMD, dummy, mode, result, CRC, len)
+fmt = '>H B B B B H B'.format()
+packer = struct.Struct(fmt)
+cmd = packer.pack(*value)
+self.client_socket.send(cmd) 
+```
+이 요청을 받은 스마트 케이지 서버는 콘쉘의 프로토콜 0x14에 따라 시스템 상태 정보를 보냅니다. 이 정보를 다음 코드로 받습니다.
+```python
+# receive data 
+data = self.client_socket.recv(1024)
+```
+받은 정보는 다음 코드로 파싱하고, UI의 각 해당 위치를 업데이트 합니다. 
+```python
+# parsing data 
+fmt = '>H B B B B H B H 40p H 4s 4s 4s B 10p 10p 4s 4s 4s 15p H B B B B B B f H B B B B B H B B B B B 10p 10p'.format()
+unpack_data = struct.unpack(fmt, data)
+print(unpack_data[7])
+print(unpack_data[8])
+print(unpack_data[9])
+print(unpack_data[10])
+print(unpack_data[11])
+print(unpack_data[12])
+self.label_prj_name_var.setText(unpack_data[8].decode())
+self.label_mcu_ip_var.setText(socket.inet_ntoa(unpack_data[10]))
+self.label_mcu_subnet_var.setText(socket.inet_ntoa(unpack_data[11]))
+self.label_mcu_gateway_var.setText(socket.inet_ntoa(unpack_data[12]))
+self.label_wifi_ip_var.setText(socket.inet_ntoa(unpack_data[16]))
+self.label_wifi_subnet_var.setText(socket.inet_ntoa(unpack_data[17]))
+self.label_wifi_gateway_var.setText(socket.inet_ntoa(unpack_data[18]))
+       self.label_mcu_time_var.setText(str(unpack_data[20])+str(unpack_data[21])+str(unpack_data[22])+str(unpack_data[23])+str(unpack_data[24])+str(unpack_data[25]))
+       self.label_start_lab_var.setText(str(unpack_data[28])+str(unpack_data[29])+str(unpack_data[30])+str(unpack_data[31])+str(unpack_data[32])+str(unpack_data[33]))
+       self.label_stop_lab_var.setText(str(unpack_data[34])+str(unpack_data[35])+str(unpack_data[36])+str(unpack_data[37])+str(unpack_data[38])+str(unpack_data[39]))
+```
+#### PC클라이언트 메인 코드 
+PC클라이언트의 메인 코드는 다음과 같다. 
+```python
+#QApplication : 프로그램을 실행시켜주는 클래스
+app = QApplication(sys.argv) 
+
+#WindowClass의 인스턴스 생성
+myWindow = WindowClass() 
+
+#프로그램 화면을 보여주는 코드
+myWindow.show()
+
+#프로그램을 이벤트루프로 진입시키는(프로그램을 작동시키는) 코드
+app.exec_()
+```
