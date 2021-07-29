@@ -13,17 +13,22 @@ class WindowClass(QMainWindow, form_class) :
         super().__init__()
         self.setupUi(self)
 
+        # socket setting 
         self.host = '172.31.99.2'
         self.port = 9998
-       
         self.client_socket = socket.socket(socket.AF_INET,socket.SOCK_STREAM) 
         self.client_socket.connect((self.host, self.port))
 
+        # conshell protocol 0x51, cage status, make button and resiter handler function 
         self.askStatus.clicked.connect(self.ask_Status)
+        # conshell protocol 0x25, sensor control, make button and resiter handler function
         self.doControl.clicked.connect(self.do_control)
+        # conshell protocol 0x13, system setting, make button and resiter handler function
         self.systemSet.clicked.connect(self.system_set)
+        # conshell protocol 0x24, system status, make button and resiter handler function 
         self.askSystem.clicked.connect(self.ask_system)
         
+        # conshell protocol 0x13 system setting - edit text box 
         self.edt_set_project_id.textChanged.connect(self.set_project_id)
         self.edt_set_project_name.textChanged.connect(self.set_project_name)
         self.edt_set_cage_id.textChanged.connect(self.set_cage_id)
@@ -31,29 +36,30 @@ class WindowClass(QMainWindow, form_class) :
         self.edt_set_stop_time.textChanged.connect(self.set_stop_time)
         self.edt_set_calc_rate.textChanged.connect(self.set_calc_rate)
 
+        # conshell protocol 0x25 sensor control - edit text box 
         self.edt_d_sensor_no.textChanged.connect(self.set_d_sensor_no)
         self.edt_d_sensor_var.textChanged.connect(self.set_d_sensor_var)
 
-        self.ProjectID = 0x00
-        self.ProjectName = b''
-        self.CageID = 0x00
-        self.autoInterval = 0x00
-        self.distCalcRate = 0x00
-        self.startLab_y = 2021 
-        self.startLab_mo = 4
-        self.startLab_d = 28 
-        self.startLab_h = 12 
-        self.startLab_mi = 30 
-        self.startLab_s = 0 
-        self.stopLab_y = 2021 
-        self.stopLab_mo = 4
-        self.stopLab_d = 28 
-        self.stopLab_h = 12 
-        self.stopLab_mi = 30 
-        self.stopLab_s = 0 
+        self.ProjectID = 0x00           # project ID 
+        self.ProjectName = b''          # project name 
+        self.CageID = 0x00              # cage ID 
+        self.autoInterval = 0x00        # auto interval 
+        self.distCalcRate = 0x00        # distance calculation rate 
+        self.startLab_y = 2021          # test start year 
+        self.startLab_mo = 4            # test start month 
+        self.startLab_d = 28            # test start day    
+        self.startLab_h = 12            # test start hour    
+        self.startLab_mi = 30           # test start minute 
+        self.startLab_s = 0             # test start second 
+        self.stopLab_y = 2021           # test stop year    
+        self.stopLab_mo = 4             # test stop month
+        self.stopLab_d = 28             # test stop day
+        self.stopLab_h = 12             # test stop hour
+        self.stopLab_mi = 30            # test stop minute
+        self.stopLab_s = 0              # test stop second 
 
-        self.d_sensor_no = 0
-        self.d_sensor_value = 0
+        self.d_sensor_no = 0            # senosr number to be set 
+        self.d_sensor_value = 0         # sensor value to be set
 
     def set_project_id(self):
         try:
@@ -126,6 +132,7 @@ class WindowClass(QMainWindow, form_class) :
         self.client_socket.send(cmd) 
         # receive data 
         data = self.client_socket.recv(1024)
+        # parsing data 
         fmt = '>H B B B B H B H H B I f H H I H H I H H f f f I I I I I I I I I I I I I I B B B B B B B B B B B B B B B B B'.format()
         unpack_data = struct.unpack(fmt, data)
         print(unpack_data)
@@ -165,6 +172,7 @@ class WindowClass(QMainWindow, form_class) :
         self.client_socket.send(cmd) 
         # receive data 
         data = self.client_socket.recv(1024)
+        # parsing data 
         fmt = '>H B B B B H B'.format()
         unpack_data = struct.unpack(fmt, data)
         print(unpack_data)
@@ -190,6 +198,7 @@ class WindowClass(QMainWindow, form_class) :
         self.client_socket.send(cmd) 
         # receive data 
         data = self.client_socket.recv(1024)
+        # parsing data 
         fmt = '>H B B B B H B'.format()
         unpack_data = struct.unpack(fmt, data)
         print(unpack_data)
@@ -211,6 +220,7 @@ class WindowClass(QMainWindow, form_class) :
         self.client_socket.send(cmd) 
         # receive data 
         data = self.client_socket.recv(1024)
+        # parsing data 
         fmt = '>H B B B B H B H 40p H 4s 4s 4s B 10p 10p 4s 4s 4s 15p H B B B B B B f H B B B B B H B B B B B 10p 10p'.format()
         unpack_data = struct.unpack(fmt, data)
         print(unpack_data[7])
