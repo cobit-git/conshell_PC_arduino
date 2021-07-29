@@ -116,10 +116,89 @@ self.client_socket = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
 self.client_socket.connect((self.host, self.port))
 ```
 
+#### 버튼 클릭 셋팅 
+PyQt5 버튼 기능을 셋팅합니다. 콘쉘 프로토콜 중 4개의 프로토콜을 구현했습니다. 다음의 코드는 각각의 버튼에 프로토콜을 실행하는 함수를 맵핑하는 코드입니다. 
+```python
+# conshell protocol 0x51, cage status, make button and resiter handler function 
+self.askStatus.clicked.connect(self.ask_Status)
+# conshell protocol 0x25, sensor control, make button and resiter handler function
+self.doControl.clicked.connect(self.do_control)
+# conshell protocol 0x13, system setting, make button and resiter handler function
+self.systemSet.clicked.connect(self.system_set)
+# conshell protocol 0x24, system status, make button and resiter handler function 
+self.askSystem.clicked.connect(self.ask_system)
+```
 
+#### 콘쉘 프로토콜 0x13 시스템 셋팅 에디트 텍스트 박스 코드 
+콘쉘 프로토콜 0x13 시스템 셋팅 에디트 테스트 박스는 다음코드로 구현되어 있습니다.    
+각각의 에디트텍스트에 데이터를 입력하고 "시스템셋팅(0x13)" 버튼을 클릭하면 데이터가 스마트케이지 서버로 전송이 됩니다.    
+```python
+# conshell protocol 0x13 system setting - edit text box
+self.edt_set_project_id.textChanged.connect(self.set_project_id)
+self.edt_set_project_name.textChanged.connect(self.set_project_name)
+self.edt_set_cage_id.textChanged.connect(self.set_cage_id)
+self.edt_set_start_time.textChanged.connect(self.set_start_time)
+self.edt_set_stop_time.textChanged.connect(self.set_stop_time)
+self.edt_set_calc_rate.textChanged.connect(self.set_calc_rate)
+```
 
+#### 콘쉘 프로토콜 0x25 디지털 센서 제어 에디트 텍스트 박스 코드 
+콘쉘 프로토콜 0x25 디지털 센서 제어 에디트 테스트 박스는 다음코드로 구현되어 있습니다. 
+```python
+# conshell protocol 0x25 sensor control - edit text box 
+self.edt_d_sensor_no.textChanged.connect(self.set_d_sensor_no)
+self.edt_d_sensor_var.textChanged.connect(self.set_d_sensor_var)
+```
 
-
+#### ask_Status() 함수 
+이 함수는 콘쉘 프로토콜 0x51을 구현한 함수 입니다. 다음과 같이 욫어 패킷을 전송합니다. 
+```python
+# packet  
+STX = 0x0203
+CMD = 0x51
+dummy = 0xff
+mode = 0x00
+result = 0x00
+CRC = 0xffff
+len = 0x00
+# pack packet and send packet 
+value = (STX, CMD, dummy, mode, result, CRC, len)
+fmt = '>H B B B B H B'.format()
+packer = struct.Struct(fmt)
+cmd = packer.pack(*value)
+self.client_socket.send(cmd) 
+```
+이 요청을 받은 스마트 케이지 서버는 콘쉘의 프로토콜 0x51에 따라 케이지 상태 정보를 보냅니다. 이 정보를 다음 코드로 받습니다. 
+```python
+ # receive data 
+ data = self.client_socket.recv(1024)
+```
+그리고 다음 코드로 파싱을 해서 데이터를 얻습니다. 
+```python 
+# parsing data
+fmt = '>H B B B B H B H H B I f H H I H H I H H f f f I I I I I I I I I I I I I I B B B B B B B B B B B B B B B B B'.format()
+unpack_data = struct.unpack(fmt, data)
+print(unpack_data)
+```
+그 다음에는 데이터를 UI 화면에 채워 넣습니다. 
+```python
+self.label_prj_id_var.setText(str(unpack_data[7]))
+self.label_cage_id_var.setText(str(unpack_data[8]))
+self.label_rat_temp_var.setText(str(unpack_data[11]))
+self.label_x_var.setText(str(unpack_data[12]))
+self.label_y_var.setText(str(unpack_data[13]))
+self.labelA2_RatWeight_var.setText(str(unpack_data[22]))
+self.labelA0_RoomTemp_var.setText(str(round(unpack_data[20], 2)))
+self.labelA1_Humid_var.setText(str(round(unpack_data[21], 2)))
+if unpack_data[38] == 1:
+    self.labelD1_lamp_var.setText("HIGH") 
+else:
+    self.labelD1_lamp_var.setText("LOW")
+if unpack_data[39] == 1:
+    self.labelD2_door_var.setText("HIGH")
+else:
+    self.labelD2_door_var.setText("LOW")
+````
 
 
 
