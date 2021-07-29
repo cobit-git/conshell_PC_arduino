@@ -310,7 +310,7 @@ self.label_wifi_gateway_var.setText(socket.inet_ntoa(unpack_data[18]))
        self.label_stop_lab_var.setText(str(unpack_data[34])+str(unpack_data[35])+str(unpack_data[36])+str(unpack_data[37])+str(unpack_data[38])+str(unpack_data[39]))
 ```
 #### PC클라이언트 메인 코드 
-PC클라이언트의 메인 코드는 다음과 같다. 
+PC클라이언트의 메인 코드는 다음과 같습니다. 
 ```python
 #QApplication : 프로그램을 실행시켜주는 클래스
 app = QApplication(sys.argv) 
