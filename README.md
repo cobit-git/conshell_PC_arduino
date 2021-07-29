@@ -151,7 +151,7 @@ self.edt_d_sensor_var.textChanged.connect(self.set_d_sensor_var)
 ```
 
 #### ask_Status() 함수 
-이 함수는 콘쉘 프로토콜 0x51을 구현한 함수 입니다. 다음과 같이 욫어 패킷을 전송합니다. 
+이 함수는 콘쉘 프로토콜 0x51을 구현한 함수 입니다. 다음과 같이 요청 패킷을 전송합니다. 
 ```python
 # packet  
 STX = 0x0203
@@ -199,6 +199,34 @@ if unpack_data[39] == 1:
 else:
     self.labelD2_door_var.setText("LOW")
 ````
-
-
-
+#### do_control() 함수 
+이 함수는 콘쉡 프로토콜 0x25 디지털 센서 제어를 구현한 함수 입니다. 다음과 같이 제어하고 싶은 센서번호와 값을 입력하고 요청 패킷을 보냅니다. 
+```python
+ # packet 
+ STX = 0x0203
+ CMD = 0x21
+ dummy = 0xff
+ mode = 0x00
+ result = 0x00
+ CRC = 0xffff
+ len = 0x00
+ # pack packet and send packet 
+ value = (STX, CMD, dummy, mode, result, CRC, len, self.d_sensor_no, self.d_sensor_var)
+ fmt = '>H B B B B H B B B'.format()
+ packer = struct.Struct(fmt)
+ cmd = packer.pack(*value)
+ self.client_socket.send(cmd) 
+ ```
+ 이 요청을 받은 스마트 케이지 서버는 콘쉘의 프로토콜 0x51에 따라 디지털 센서를 셋팅하고 회신 패킷을 보냅니다. 이 정보를 다음 코드로 받습니다. 
+```python
+ # receive data 
+ data = self.client_socket.recv(1024)
+ ```
+ 
+ 회신된 데이터를 파싱합니다. 
+ ```python
+ # parsing data 
+ fmt = '>H B B B B H B'.format()
+ unpack_data = struct.unpack(fmt, data)
+ print(unpack_data)
+ ```
