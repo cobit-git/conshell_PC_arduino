@@ -57,8 +57,69 @@ a1 -> turn on LED
 ### PC 클라이언트
 PC 클라이언트는 라즈베리파이에서 동작하는 스마트 케이지 서버와 통신하고, 스마트 케이지 서버가 전달하는 데이터를 PC에 UI 화면으로 보여주는 파이썬 코드입니다. 
 이 PC 쿨라이언트는 콘쉘의 결국에는 모니터링 프로그램으로 대체 되어야 합니다. 이 파이썬 코드는 스마트 케이지 서버가 제대로 동작하는지 체크하기 위해 임시로 개발한 tool 입니다. 
+PC클라이언트 프로그램을 실행할 PC에 파이썬 3.x 버전이 설치되어 있어야 합니다. 
 
 ### 라즈베리파이 스마트 케이지 서버와 PC 클라이언트와 통신
-라즈베리파이에서 동작하는 스마트 케이지 서버와 PC클라이언트는 소켓 통신을 통해서 통신을 합니다. 구체적인 통신의 개념도는 다음과 같습니다. 
+라즈베리파이에서 동작하는 스마트 케이지 서버와 PC클라이언트는 소켓 통신을 통해서 통신을 합니다. 구체적인 통신의 개념도는 다음과 같습니다.    
+![image](https://user-images.githubusercontent.com/76054530/127469496-7e81818b-f5d0-4b36-8c67-9d7e90da7bb5.png)
+
+### 파이썬 라이브러리 임포트 
+PC클라이언트 파이썬 코드를 실행하기 위해서 다음과 같은 파이썬 라이브러리를 임포트 합니다. 
+```python
+import sys
+import socket 
+import struct
+from PyQt5.QtWidgets import *
+from PyQt5 import uic
+```
+
+이 중에서 PyQt5 라이브러리는 별도로 설치를 해 주어야 합니다. 다음과 같이 설치를 합니다. 
+<pre><code>
+$pip install pyqt5
+</code></pre>
+
+### PC클라이언트 프로그램 실행 화면 
+PC클라이언트 프로그램은 다음과 같이 실행하면 됩니다. 
+<pre><code>
+$python conshell_monitor_pyqt.py
+</code></pre>
+
+프로그램이 실행되면 다음과 같은 화면이 디스플레이 됩니다. 
+![image](https://user-images.githubusercontent.com/76054530/127475491-ed88ff1d-66b0-4e6e-87fa-aa9739d7b90a.png)
+
+
+### PC클라이언트 프로그램 파이썬 코드 
+#### UI 파일 로드 
+PC클라이언트 프로그램은 PyQt5를 이용해서 UI 화면을 구성합니다. 그래서 UI 파일이 필요합니다. UI 파일은 "conshell_ui.ui" 입니다. 깃허브에 PC클라이언트 프로그램과 같이 다운로드 됩니다. 
+UI 파일의 로드는 다음과 같이 합니다. 
+```python
+form_class = uic.loadUiType("conshell_ui.ui")[0]
+```
+#### 메인 윈도 클래스 
+PC클라이언트의 UI를 그려주는 클래스는 다음과 같습니다. 이 클래스에서 UI를 그려주고, 소켓 통신을 열고, 관리 합니다. 
+```python
+class WindowClass(QMainWindow, form_class) :
+```
+
+#### 소켓 통신용 IP 어드레스 및 포트번호 설정 
+라즈베리파이에서 동작하는 스마트 케이즈 서버에 접속하려면 스마트 서버의 IP, 즉 라즈베리파이의 IP를 알아야 합니다. 라즈베리파이 IP를 다음 코드와 같이 셋팅합니다.    
+포트 번호는 9998을 사용했습니다.    
+```python 
+self.host = '172.31.99.2'
+self.port = 9998
+```
+
+#### 소켓 통신 연결하기 
+소켓 통신은 다음과 같은 코드로 연결을 합니다. 
+```python
+self.client_socket = socket.socket(socket.AF_INET,socket.SOCK_STREAM) 
+self.client_socket.connect((self.host, self.port))
+```
+
+
+
+
+
+
 
 
